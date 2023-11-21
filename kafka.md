@@ -53,24 +53,23 @@ Zookeeper：Kafka 使用 Zookeeper 来管理集群配置和协调。
 
 ## 零拷贝（zero-copy）
 
-![Image description](https://github.com/yzyolala/OOD/blob/main/images/Screenshot%202023-11-21%20at%2000.56.06.png?raw=true)
+![Image description](https://github.com/yzyolala/OOD/blob/main/images/Screenshot%202023-11-21%20at%2002.32.05.png?raw=true)
 
-![Image description](https://github.com/yzyolala/OOD/blob/main/images/Screenshot%202023-11-21%20at%2000.56.41.png?raw=true)
+![Image description](https://github.com/yzyolala/OOD/blob/main/images/Screenshot%202023-11-21%20at%2002.32.19.png?raw=true)
 
-这两张图解释了 Kafka 是如何通过“零拷贝（zero-copy）”技术来实现高速数据传输的。
+第一张图（使用零拷贝）：
 
-第一张图（没有使用零拷贝技术）:
+生产者写入数据：数据首先由生产者写入 Kafka 的应用程序缓冲区。
+写入到RAM：然后数据从应用程序缓冲区写入到操作系统的缓冲区（内存）。
+同步到磁盘：操作系统缓冲区中的数据会定期同步到磁盘上。
+零拷贝到网络接口卡缓冲区：直接从磁盘到网络接口卡（NIC）的缓冲区的数据拷贝。
+发送到消费者：最后，数据通过网络发送到消费者。
+第二张图（没有使用零拷贝）：
 
-生产者（Producer）将数据写入 Kafka 应用程序缓冲区。
-数据随后被写入到 RAM 中的操作系统缓冲区（OS Buffer）。
-操作系统会定期将数据从操作系统缓冲区同步到磁盘（Disk）。
-这张图展示了传统的数据流转过程，数据从用户空间移动到内核空间，然后再写入磁盘，这个过程涉及到多次数据拷贝和上下文切换。
-
-第二张图（使用了零拷贝技术）:
-
-这张图可能展示了使用零拷贝优化的相同过程，但当前文本描述中没有显示出来。零拷贝是一种直接将数据从文件系统缓存传输到网络套接字的方法，省去了在用户空间和内核空间之间拷贝数据的需要。这样可以减少 CPU 使用率，提高数据吞吐量。
-
-图例中用不同颜色标注了写入流程、带零拷贝的读取流程和不带零拷贝的读取流程。
+生产者写入数据：与第一张图相同，生产者将数据写入 Kafka 缓冲区。
+多次数据拷贝：数据在从磁盘到达网络接口卡的缓冲区前，需要经过多次拷贝，先从磁盘到操作系统缓冲区，然后到套接字缓冲区，最后到网络接口卡缓冲区。
+发送到消费者：数据最终被发送到消费者。
+两张图的比较展示了使用零拷贝技术可以减少数据在系统内的拷贝次数，从而减少了CPU负载和提高了数据传输效率。
 
 零拷贝的关键点:
 
